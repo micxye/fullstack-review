@@ -2,7 +2,7 @@ const express = require('express');
 let app = express();
 const bodyParser = require("body-parser");
 const github = require('../helpers/github.js');
-const db = ('../database/index.js');
+var db = require('../database/index.js');
 
 app.use(bodyParser.json());
 
@@ -14,18 +14,43 @@ app.post('/repos', function (req, res) {
   // and get the repo information from the github API, then
   // save the repo information in the database
   let username = req.body.user;
-  let githubData = github.getReposByUsername(username, (data) => {return data});
-  let repoData = {
-    user: githubData.name,
-    url: githubData.url,
-    size: githubData.size
-  }
-  db.save(githubData);
+  console.log(username)
+  github.getReposByUsername(username, (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      const githubData = JSON.parse(data.body);
+      githubData.forEach(function(repo) {
+        let repoData = {
+          user: repo.name,
+          url: repo.url,
+          size: repo.size
+        }
+        db.save(repoData, (err, data) => {
+          if (err) {
+            console.log('SAVE ERROR')
+            //console.log(err);
+          } else {
+            console.log("successfully saved to db ", data);
+          }
+        }); 
+      })
+    }
+  });
 });
 
 app.get('/repos', function (req, res) {
   // TODO - your code here!
   // This route should send back the top 25 repos
+  let username = req.body.data;
+  //get array of objects(repos)
+  db.get25((err, repos)=>{
+    if (err) {
+      console.log(err)
+    } else {
+      res.json(repos)
+    }
+  })
 });
 
 let port = 1128;

@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import Search from './components/Search.jsx';
 import RepoList from './components/RepoList.jsx';
-//import Db from '../database/index.js'; //error importing
 
 class App extends React.Component {
   constructor(props) {
@@ -11,7 +10,11 @@ class App extends React.Component {
     this.state = { 
       repos: []
     }
+    this.getTop25.bind(this);
+  }
 
+  componentDidMount() {
+    this.getTop25();
   }
 
   search (term) {
@@ -20,9 +23,26 @@ class App extends React.Component {
     $.ajax({
       type: "POST",
       url: "/repos",
-      data: term,
+      data: JSON.stringify({"user": term}),
+      contentType: "application/json",
       success: function() {
         console.log('success!')
+
+      },
+      error: function() {
+        console.log('error')
+      }
+    })
+  }
+
+  getTop25 () {
+    console.log('got top 25!')
+    $.ajax({
+      type: "GET",
+      url: "/repos",
+      success: (data) => {
+        console.log('success!')
+        this.setState({repos: data});
       }
     })
   }
@@ -30,8 +50,8 @@ class App extends React.Component {
   render () {
     return (<div>
       <h1>Github Fetcher</h1>
+      <Search onSearch={this.search.bind(this)} />
       <RepoList repos={this.state.repos}/>
-      <Search onSearch={this.search.bind(this)}/>
     </div>)
   }
 }

@@ -1,8 +1,14 @@
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/data/db');
+mongoose.connect('mongodb://localhost/db');
 const db = mongoose.connection;
-db.dropDatabase('data');
-var uniqueValidator = require('mongoose-unique-validator');
+db.dropDatabase('db');
+
+const uniqueValidator = require('mongoose-unique-validator');
+
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function () {
+  console.log('connected!!!')
+});
 
 let repoSchema = mongoose.Schema({
   // TODO: your schema here!
@@ -12,38 +18,44 @@ let repoSchema = mongoose.Schema({
 
 });
 
+// var dummy = {
+//   user: 'dylan',
+//   url: 'dylaniswack.com',
+//   size: 5
+// }
+
 repoSchema.plugin(uniqueValidator);
 
 let Repo = mongoose.model('Repo', repoSchema);
 
-let save = (repoData) => {
+var save = (repoData, callback) => {
   var githubRepo = new Repo(repoData);
-  var username = repoData.user;
   //check if username already exists in db
   //determine uniqueness
   githubRepo.save(function(err, res) {
     if (err) {
-      callback(err);
+      callback(err, null);
     } else {
-      console.log(res);
+      callback(null, res);
     }
   })
 }
 
-let get25 = (repo, callback) => {
+var get25 = (callback) => {
   Repo
-    .find('repo')
-    .sort({size: -1})
+    .find()
+    .sort('-size')
     .limit(25)
-    .exec(function(err, repo) {
-        if (err) {
-          callback(err);
-        } else {
-          callback(repo);
-        }
-      }
-    )
+    .exec(callback)
 }
+
+//db tests
+//save(dummy, (err, data) => console.log(data));
+
+// get25((err, repo)=> {if (err) {console.log(err)} else {
+//   console.log('GOT 25')
+//   console.log(repo)
+// }})
 
 module.exports.save = save;
 module.exports.get25 = get25;

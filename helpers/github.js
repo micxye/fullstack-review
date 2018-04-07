@@ -25,4 +25,14 @@ let getReposByUsername = (username, callback) => {
 
 }
 
+//test
+// getReposByUsername('dylanqian29', (err, res)=> {
+//   if (err) { 
+//     console.log('hi')
+//     // console.log(err) 
+//   } else {
+//     console.log(res)
+//   }
+// })
+
 module.exports.getReposByUsername = getReposByUsername;
