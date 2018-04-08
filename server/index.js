@@ -14,35 +14,53 @@ app.post('/repos', function (req, res) {
   // and get the repo information from the github API, then
   // save the repo information in the database
   let username = req.body.user;
-  console.log(username)
   github.getReposByUsername(username, (err, data) => {
     if (err) {
       console.log(err);
     } else {
       const githubData = JSON.parse(data.body);
-      githubData.forEach(function(repo) {
-        let repoData = {
-          user: repo.name,
-          url: repo.url,
-          size: repo.size
-        }
-        db.save(repoData, (err, data) => {
-          if (err) {
-            console.log('SAVE ERROR')
-            //console.log(err);
-          } else {
-            console.log("successfully saved to db ", data);
+        for (var i = 0; i < githubData.length; i++) {
+          let repoData = {
+            user: githubData[i].name,
+            url: githubData[i].html_url,
+            size: githubData[i].size
           }
-        }); 
-      })
+          if (i === githubData.length - 1) {
+            db.save(repoData, (err, data) => {
+              if (err) {
+                console.log('SAVE ERROR')
+              } else {
+                console.log("successfully saved to db ", data);
+                  db.get25((err, repos) => {
+                    if (err) {
+                      console.log('err');
+                    } else {
+                      res.json(repos);
+                    }
+                  })
+                
+              }
+            })
+          } else {
+            db.save(repoData, (err, data) => {
+              if (err) {
+                console.log('SAVE ERROR')
+              } else {
+                console.log("successfully saved to db ", data);
+              }
+            })
+          }
+        }
+      } 
     }
-  });
-});
+  )
+})
+
+
 
 app.get('/repos', function (req, res) {
   // TODO - your code here!
   // This route should send back the top 25 repos
-  let username = req.body.data;
   //get array of objects(repos)
   db.get25((err, repos)=>{
     if (err) {

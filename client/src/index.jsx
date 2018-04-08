@@ -18,22 +18,29 @@ class App extends React.Component {
   }
 
   search (term) {
-    console.log(`${term} was searched`);
-    // TODO
-    $.ajax({
-      type: "POST",
-      url: "/repos",
-      data: JSON.stringify({"user": term}),
-      contentType: "application/json",
-      success: function() {
-        console.log('success!')
-
-      },
-      error: function() {
-        console.log('error')
-      }
-    })
-  }
+    if (term !== "") {
+      console.log(`${term} was searched`);
+      $.ajax({
+        type: "POST",
+        url: "/repos",
+        data: JSON.stringify({ "user": term }),
+        contentType: "application/json",
+        dataType: 'json',
+        success: (data)=> {
+          console.log('success!')
+          this.setState({
+            repos: data
+          })
+        },
+        error: function () {
+          console.log('error')
+        }
+      })
+    } else {
+      console.log('ERROR please enter a username')
+    }
+    
+  } 
 
   getTop25 () {
     console.log('got top 25!')

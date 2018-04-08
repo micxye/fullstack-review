@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/db');
 const db = mongoose.connection;
-db.dropDatabase('db');
+db.dropDatabase('db'); 
 
 const uniqueValidator = require('mongoose-unique-validator');
 
